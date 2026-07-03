@@ -40,7 +40,7 @@ function DocumentChips({ documents }) {
           className="flex items-center gap-1.5 rounded-full border border-neutral-700 bg-neutral-800/60 px-2.5 py-1 text-xs text-neutral-300"
         >
           <FileIcon />
-          <span className="max-w-[160px] truncate">{title}</span>
+          <span className="max-w-40 truncate">{title}</span>
         </div>
       ))}
     </div>
