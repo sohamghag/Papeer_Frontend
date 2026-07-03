@@ -203,6 +203,30 @@ Measured via LangSmith tracing on real requests, one per route.
 | **Total** | **7.54s** | **~1.3K** |
  
 **Token split:** input ~1.1K (87%) / output 159 (13%) · **Answer quality:** 5/5
+
+
+### Document Ingestion (upload → searchable)
+ 
+Measured uploading a 150-page PDF through `/api/upload`.
+ 
+| Metric | Value |
+|---|---:|
+| Pages | 150 |
+| Chunks | 301 |
+| Embedding tokens | 83,845 |
+| Embedding cost | ~$0.00169 |
+| Loading + splitting | ~25s |
+| Embedding + DB storage | ~12s |
+| **T
+ 
+### Summary — all three routes
+ 
+| Route | Latency | Tokens | Quality |
+|---|---:|---:|---|
+| Direct Answer | 4.36s | 620 | Correct |
+| Verify Claim | 7.54s | ~1.3K | 5/5 |
+| Retrieve Answer | 14.03s | ~4K | 5/5 |
+ 
  
 ### Summary — all three routes
  
