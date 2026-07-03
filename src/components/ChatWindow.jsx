@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import MessageBubble from "./MessageBubble";
+import MessageBubble from "./Messagebubble";
 import InputBox from "./InputBox";
 
 function FileIcon() {
