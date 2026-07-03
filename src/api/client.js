@@ -1,4 +1,6 @@
-const BASE = "/api";
+// const BASE = "/api";
+
+const BASE = import.meta.env.VITE_API_BASE_URL;
 
 export async function createSession() {
   const res = await fetch(`${BASE}/session`, {
