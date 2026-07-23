@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
+import ApiKeysModal from "./components/ApiKeysModal";
+import { getApiKeys } from "./utils/apiKeys";
 import {
   createSession,
   sendChat,
@@ -50,6 +52,25 @@ function ChevronIcon() {
   );
 }
 
+function KeyIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="7.5" cy="15.5" r="5.5" />
+      <path d="M21 2l-9.6 9.6" />
+      <path d="M15.5 7.5l3 3L22 7l-3-3" />
+    </svg>
+  );
+}
+
 export default function App() {
   const [sessionId, setSessionId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -60,6 +81,7 @@ export default function App() {
   const [uploading, setUploading] = useState(false);
   const [loadingUrl, setLoadingUrl] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKeysModalOpen, setApiKeysModalOpen] = useState(false);
   const sendingRef = useRef(false); // synchronous lock, immune to render-cycle races
 
   const loadConversations = useCallback(async () => {
@@ -127,7 +149,8 @@ export default function App() {
     setMessages((prev) => [...prev, { role: "user", content: text }]);
     setIsLoading(true);
     try {
-      const data = await sendChat(sessionId, text);
+      const { openaiKey, kimiKey } = getApiKeys();
+      const data = await sendChat(sessionId, text, openaiKey, kimiKey);
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: data.answer },
@@ -142,9 +165,10 @@ export default function App() {
         ...prev,
         {
           role: "assistant",
-          content: "Something went wrong. Please try again.",
+          content: err.message || "Something went wrong. Please try again.",
         },
       ]);
+      if (err.status === 400) setApiKeysModalOpen(true);
     } finally {
       setIsLoading(false);
       sendingRef.current = false;
@@ -194,7 +218,13 @@ export default function App() {
         ]);
       }
 
-      const result = await uploadFile(activeSessionId, file);
+      const { openaiKey, kimiKey } = getApiKeys();
+      const result = await uploadFile(
+        activeSessionId,
+        file,
+        openaiKey,
+        kimiKey,
+      );
 
       setMessages((prev) => [
         ...prev,
@@ -211,9 +241,11 @@ export default function App() {
         ...prev,
         {
           role: "assistant",
-          content: "Failed to upload the file. Please try again.",
+          content:
+            err.message || "Failed to upload the file. Please try again.",
         },
       ]);
+      if (err.status === 400) setApiKeysModalOpen(true);
     } finally {
       setUploading(false);
       setSelectedFile(null);
@@ -235,7 +267,8 @@ export default function App() {
         ]);
       }
 
-      const result = await loadUrl(activeSessionId, url);
+      const { openaiKey, kimiKey } = getApiKeys();
+      const result = await loadUrl(activeSessionId, url, openaiKey, kimiKey);
 
       setMessages((prev) => [
         ...prev,
@@ -252,9 +285,10 @@ export default function App() {
         ...prev,
         {
           role: "assistant",
-          content: "Failed to load that URL. Please try again.",
+          content: err.message || "Failed to load that URL. Please try again.",
         },
       ]);
+      if (err.status === 400) setApiKeysModalOpen(true);
     } finally {
       setLoadingUrl(false);
     }
@@ -307,18 +341,36 @@ export default function App() {
               Papeer
             </span>
           </div>
+          <button
+            type="button"
+            onClick={() => setApiKeysModalOpen(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
+            aria-label="API Keys"
+          >
+            <KeyIcon />
+          </button>
         </div>
 
         {/* Mobile top bar */}
-        <div className="flex items-center gap-3 border-b border-neutral-800 p-3 md:hidden">
+        <div className="flex items-center justify-between gap-3 border-b border-neutral-800 p-3 md:hidden">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-800"
+              aria-label="Open menu"
+            >
+              <MenuIcon />
+            </button>
+            <span className="text-sm font-medium">Papeer</span>
+          </div>
           <button
-            onClick={() => setSidebarOpen(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-neutral-800"
-            aria-label="Open menu"
+            type="button"
+            onClick={() => setApiKeysModalOpen(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
+            aria-label="API Keys"
           >
-            <MenuIcon />
+            <KeyIcon />
           </button>
-          <span className="text-sm font-medium">Papeer</span>
         </div>
 
         <div className="min-h-0 flex-1">
@@ -336,6 +388,11 @@ export default function App() {
           />
         </div>
       </div>
+
+      <ApiKeysModal
+        open={apiKeysModalOpen}
+        onClose={() => setApiKeysModalOpen(false)}
+      />
     </div>
   );
 }
