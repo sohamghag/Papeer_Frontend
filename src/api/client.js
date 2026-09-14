@@ -1,12 +1,9 @@
 // const BASE = "/api";
 
 const BASE = import.meta.env.VITE_API_BASE_URL;
-// const BASE = "http://127.0.0.1:8000/api";
+// const BASE = "https://papeer-backend.onrender.com/api";
+// const BASE = "http://51.79.251.202:8000/api";
 
-// Reads the backend's actual error message (FastAPI's {detail: "..."} body)
-// instead of throwing a generic string that hides why a request failed.
-// Attaches the HTTP status so callers can react to specific cases
-// (e.g. 400 = missing API key) without string-matching the message.
 async function throwApiError(res, fallbackMessage) {
   let detail = fallbackMessage;
   try {
