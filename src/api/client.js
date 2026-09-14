@@ -1,8 +1,4 @@
-// const BASE = "/api";
-
 const BASE = import.meta.env.VITE_API_BASE_URL;
-// const BASE = "https://papeer-backend.onrender.com/api";
-// const BASE = "http://51.79.251.202:8000/api";
 
 async function throwApiError(res, fallbackMessage) {
   let detail = fallbackMessage;
